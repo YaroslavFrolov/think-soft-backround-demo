@@ -5,10 +5,11 @@ import { Circle } from './Circle';
 
 
 
-const PADDING = 10;
-const LINES = 3;
+const SIBLINGS = 3;
 
 
+let content;
+let bubble;
 let width;
 let height;
 let wrapper;
@@ -26,6 +27,9 @@ addListeners();
 function initScene() {
   wrapper = document.getElementById('wrapper');
   canvas = document.getElementById('canvas');
+  content = [...document.querySelectorAll('#content-for-dots article')];
+  bubble = document.querySelector('.bubbleWithContent');
+
 
   width = wrapper.clientWidth;
   height = wrapper.clientHeight;
@@ -42,12 +46,18 @@ function initScene() {
     for(let y = 0; y < height; y = y + height/5) {
       let px = x + Math.random()*width/5;
       let py = y + Math.random()*height/5;
-      let p = {x: px, originX: px, y: py, originY: py };
+      let p = {
+        x: px,
+        y: py,
+        originX: px,
+        originY: py
+      };
       points.push(p);
     }
   }
 
-  // for each point find the 5 closest points
+
+  // for each point find the ${SIBLINGS} closest points
   for(let i = 0; i < points.length; i++) {
     let closest = [];
     let p1 = points[i];
@@ -55,7 +65,7 @@ function initScene() {
       let p2 = points[j]
       if(!(p1 == p2)) {
         let placed = false;
-        for(let k = 0; k < LINES; k++) {
+        for(let k = 0; k < SIBLINGS; k++) {
           if(!placed) {
             if(closest[k] == undefined) {
               closest[k] = p2;
@@ -64,7 +74,7 @@ function initScene() {
           }
         }
 
-        for(let k = 0; k < LINES; k++) {
+        for(let k = 0; k < SIBLINGS; k++) {
           if(!placed) {
             if(getDistance(p1, p2) < getDistance(p1, closest[k])) {
               closest[k] = p2;
@@ -76,6 +86,7 @@ function initScene() {
     }
     p1.closest = closest;
   }
+
 
   // assign a circle to each point
   for(let i in points) {
@@ -91,18 +102,33 @@ function initScene() {
     points[i].active = 0.1;
     points[i].circle.active = 0.3;
   }
+
+
+  // assign a content and tooltip to starting points
+  // @todo create points with content in certain places by business requirements
+  content.forEach((item, idx) => {
+    let tooltip = item.getAttribute('data-tooltip');
+    points[idx + idx].tooltip = tooltip;
+    points[idx + idx].content = item;
+  });
+
+
+  // create tooltips
+  for(let i in points) {
+    let p = points[i];
+    p.tooltip && createTooltip(p);
+  }
 }
 
 function addListeners() {
-  //@todo add throttle
-  window.addEventListener('mousemove', mouseMove);
-  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', mouseMove); //@todo add throttle
+  window.addEventListener('resize', resize); //@todo add debounce
 }
 
 function mouseMove(e) {
   let mouseX = e.offsetX;
   let mouseY = e.offsetY;
-  checkCollision(mouseX, mouseY);
+  checkHover(mouseX, mouseY);
 }
 
 function resize() {
@@ -111,6 +137,14 @@ function resize() {
   canvas.height = wrapper.clientHeight;
 }
 
+function createTooltip(p) {
+  let domTooltip = document.createElement('div');
+  domTooltip.classList.add('tooltipWithContent');
+  domTooltip.setAttribute('aria-hidden', true);
+  domTooltip.innerHTML = p.tooltip;
+  wrapper.appendChild(domTooltip);
+  p.tooltip = domTooltip;
+}
 
 
 // @todo decompose by best practice:
@@ -128,8 +162,16 @@ function animate(timestamp) {
   ctx.clearRect(0,0,width,height);
 
   for(let i in points) {
-    drawLines(points[i]);
-    points[i].circle.draw();
+    let p = points[i];
+
+    if (p.tooltip) {
+      p.circle.radius = 7;
+      p.circle.active = .5;
+    }
+
+    drawLines(p);
+    p.circle.draw();
+    updateTooltips(p);
   }
 
   requestAnimationFrame(animate);
@@ -137,7 +179,7 @@ function animate(timestamp) {
 
 function movePoint(p) {
   // @todo try replace to anime.js
-  let tween = TweenMax.to(p, 25+1*Math.random(), {
+  let tween = TweenMax.to(p, 20+1*Math.random(), {
     x: p.originX-50+Math.random()*300,
     y: p.originY-50+Math.random()*300,
     ease: Power1.easeInOut,
@@ -161,28 +203,46 @@ function drawLines(p) {
   }
 }
 
+function updateTooltips(p) {
+  if (!p.tooltip) return null;
+
+  p.tooltip.style.transform = `translate(${p.circle.pos.x}px, ${p.circle.pos.y}px)`;
+}
+
 
 function getDistance(p1, p2) {
   return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
 }
 
 
-function checkCollision(mouseX, mouseY) {
+function checkHover(mouseX, mouseY) {
   for(let i = 0; i < points.length; i++) {
     let p = points[i];
 
-    let leftBorder = p.circle.pos.x - p.circle.radius - PADDING;
-    let rightBorder = p.circle.pos.x + p.circle.radius + PADDING;
-    let topBorder = p.circle.pos.y - p.circle.radius - PADDING;
-    let bottomBorder = p.circle.pos.y + p.circle.radius + PADDING;
+    if (!p.tooltip) continue;
+
+    let { width, height } = p.tooltip.getBoundingClientRect();
+
+    let leftBorder = p.circle.pos.x - p.circle.radius;
+    let rightBorder = p.circle.pos.x + p.circle.radius + width;
+    let topBorder = p.circle.pos.y - p.circle.radius;
+    let bottomBorder = p.circle.pos.y + p.circle.radius + height;
 
     if((mouseX > leftBorder) && (mouseX < rightBorder) && (mouseY > topBorder) && (mouseY < bottomBorder)) {
       p.isPause || tweens.get(p).pause();
       p.isPause = true;
+      showBubble(p);
       break;
     } else {
       p.isPause && tweens.get(p).resume();
       p.isPause = false;
     }
   }
+}
+
+function showBubble(p) {
+  console.log(p.content);
+  bubble.innerHTML = p.content;
+  bubble.style.left = `${p.circle.pos.x}px`;
+  bubble.style.top = `${p.circle.pos.y}px`;
 }
