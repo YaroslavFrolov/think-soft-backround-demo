@@ -1,86 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Particles</title>
-    <style>
-      /* @tooo add reset.css and fonts */
-
-      .wrapper {
-        background: #3a3557;
-        height: 900px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      /* hide for UI, but not for screenreaders and google-bots (accessebility) */
-      .visuallyhidden:not(:focus):not(:active) {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        margin: -1px;
-        border: 0;
-        padding: 0;
-        white-space: nowrap;
-        clip-path: inset(100%);
-        clip: rect(0 0 0 0);
-        overflow: hidden;
-      }
-
-      .tooltipWithContent {
-        position: absolute;
-        left: 0;
-        top: 0;
-        background-color: white;
-        border-radius: 4px;
-        display: inline-block;
-        padding: .5em 1em;
-        color: #333;
-        pointer-events: none;
-        will-change: transform;
-      }
-
-      .bubbleWithContent:empty {
-        display: none;
-      }
-
-      .bubbleWithContent {
-        position: absolute;
-        left: 0;
-        top: 0;
-        background-color: white;
-        border-radius: 4px;
-        display: inline-block;
-        padding: .5em 1em;
-        color: #333;
-      }
-    </style>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Think Soft Demo</title>
+    <link href='https://fonts.googleapis.com/css?family=Raleway:400,700&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='reset.css'>
+    <link rel='stylesheet' href='index.css'>
 </head>
 <body>
-  <h1>Particles!!!</h1>
+  <h1>Think Soft Demo</h1>
 
   <div id='wrapper' class='wrapper'>
     <canvas id='canvas'></canvas>
-    <div class='bubbleWithContent'></div>
+    <div class='popupWithContent'></div>
   </div>
 
   <div id='content-for-dots' class='visuallyhidden'>
-    <article data-tooltip='Title 1'>
+    <article data-tooltip='TRANSPARENCY & CONTROL'>
       <h3>Title 1</h3>
       <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Nihil accusamus distinctio asperiores placeat cupiditate quibusdam quod maxime ullam officia enim iste laborum, in vel sapiente libero odio est modi ratione.</p>
     </article>
 
-    <article data-tooltip='Title 2'>
+    <article data-tooltip='HIGHT-QUALITY CODE'>
       <h3>Title 2</h3>
       <p>Vel omnis delectus voluptatibus et officiis voluptas odit facere eius nemo unde. Alias ab accusantium tempora accusamus aspernatur? Ratione, repellendus! Maxime non repellendus repudiandae inventore veniam quasi nisi, asperiores beatae.</p>
     </article>
 
-    <article data-tooltip='Title 3'>
+    <article data-tooltip='READINESS TO PIVOT & AGILE APPROACH'>
       <h3>Title 3</h3>
       <p>Natus mollitia, quam earum molestiae necessitatibus quos ea et cupiditate? Soluta eum vero ab aliquid, quis ad! Saepe perspiciatis quas error itaque? Accusamus saepe iste sequi vero illo commodi mollitia!</p>
     </article>
   </div>
+
+  <div class='padding'></div>
 
   <script src='main.js'></script>
 </body>

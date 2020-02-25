@@ -1,4 +1,4 @@
-import { TweenMax, Power1 } from 'gsap';
+import { TweenLite, Power1 } from 'gsap';
 import { Circle } from './Circle';
 
 // inspiration https://codepen.io/filipemcribeiro/pen/Wwvrbj
@@ -7,9 +7,8 @@ import { Circle } from './Circle';
 
 const SIBLINGS = 3;
 
-
 let content;
-let bubble;
+let popup;
 let width;
 let height;
 let wrapper;
@@ -28,7 +27,7 @@ function initScene() {
   wrapper = document.getElementById('wrapper');
   canvas = document.getElementById('canvas');
   content = [...document.querySelectorAll('#content-for-dots article')];
-  bubble = document.querySelector('.bubbleWithContent');
+  popup = document.querySelector('.popupWithContent');
 
 
   width = wrapper.clientWidth;
@@ -105,11 +104,12 @@ function initScene() {
 
 
   // assign a content and tooltip to starting points
-  // @todo create points with content in certain places by business requirements
-  content.forEach((item, idx) => {
+  // @todo create points with content in certain places according to business requirements
+  // @todo get coordinates for dots from data-attributes
+  content.forEach((item, idx, arr) => {
     let tooltip = item.getAttribute('data-tooltip');
-    points[idx + idx].tooltip = tooltip;
-    points[idx + idx].content = item;
+    points[idx].tooltip = tooltip;
+    points[idx].content = item;
   });
 
 
@@ -126,8 +126,11 @@ function addListeners() {
 }
 
 function mouseMove(e) {
-  let mouseX = e.offsetX;
-  let mouseY = e.offsetY;
+  let { left, top } = wrapper.getBoundingClientRect();
+
+  let mouseX = e.clientX - left;
+  let mouseY = e.clientY - top;
+
   checkHover(mouseX, mouseY);
 }
 
@@ -178,8 +181,8 @@ function animate(timestamp) {
 }
 
 function movePoint(p) {
-  // @todo try replace to anime.js
-  let tween = TweenMax.to(p, 20+1*Math.random(), {
+  // @todo replace TweenLite to anime.js
+  let tween = TweenLite.to(p, 20+1*Math.random(), {
     x: p.originX-50+Math.random()*300,
     y: p.originY-50+Math.random()*300,
     ease: Power1.easeInOut,
@@ -221,28 +224,49 @@ function checkHover(mouseX, mouseY) {
 
     if (!p.tooltip) continue;
 
-    let { width, height } = p.tooltip.getBoundingClientRect();
+    if (p.isPause) {
+      let { width, height } = popup.getBoundingClientRect();
+      let isAbovePopup = isHoverArea(p, { width, height, mouseX, mouseY });
 
-    let leftBorder = p.circle.pos.x - p.circle.radius;
-    let rightBorder = p.circle.pos.x + p.circle.radius + width;
-    let topBorder = p.circle.pos.y - p.circle.radius;
-    let bottomBorder = p.circle.pos.y + p.circle.radius + height;
+      if(!isAbovePopup) {
+        tweens.get(p).resume();
+        p.isPause = false;
+        removePopup();
+      }
 
-    if((mouseX > leftBorder) && (mouseX < rightBorder) && (mouseY > topBorder) && (mouseY < bottomBorder)) {
-      p.isPause || tweens.get(p).pause();
-      p.isPause = true;
-      showBubble(p);
       break;
-    } else {
-      p.isPause && tweens.get(p).resume();
-      p.isPause = false;
+    }
+
+    let { width, height } = p.tooltip.getBoundingClientRect();
+    let isAboveTooltip = isHoverArea(p, { width, height, mouseX, mouseY });
+
+    if(isAboveTooltip) {
+      tweens.get(p).pause();
+      showPopup(p);
+      p.isPause = true;
+      break;
     }
   }
 }
 
-function showBubble(p) {
-  console.log(p.content);
-  bubble.innerHTML = p.content;
-  bubble.style.left = `${p.circle.pos.x}px`;
-  bubble.style.top = `${p.circle.pos.y}px`;
+function showPopup(p) {
+  // @todo - detect collision with screen borders and shift position
+  popup.appendChild(p.content);
+  popup.style.left = `${p.circle.pos.x}px`;
+  popup.style.top = `${p.circle.pos.y}px`;
+}
+
+function removePopup() {
+  popup.innerHTML = '';
+}
+
+function isHoverArea (p, options) {
+  let { width, height, mouseY, mouseX } = options;
+
+  let leftBorder = p.circle.pos.x;
+  let rightBorder = p.circle.pos.x + width;
+  let topBorder = p.circle.pos.y;
+  let bottomBorder = p.circle.pos.y + height;
+
+  return (mouseX > leftBorder) && (mouseX < rightBorder) && (mouseY > topBorder) && (mouseY < bottomBorder);
 }
