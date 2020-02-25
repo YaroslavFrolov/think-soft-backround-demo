@@ -1,0 +1,19 @@
+{
+  "name": "particles-demo-yaroslav-frolov",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "start": "webpack-dev-server"
+  },
+  "private": true,
+  "license": "MIT",
+  "devDependencies": {
+    "webpack": "^4.41.1",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
+  },
+  "dependencies": {
+    "gsap": "^3.2.0"
+  }
+}
