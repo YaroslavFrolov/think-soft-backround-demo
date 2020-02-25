@@ -4,7 +4,6 @@ import { Circle } from './Circle';
 // inspiration https://codepen.io/filipemcribeiro/pen/Wwvrbj
 
 
-
 const SIBLINGS = 3;
 
 let content;
@@ -263,9 +262,9 @@ function removePopup() {
 function isHoverArea (p, options) {
   let { width, height, mouseY, mouseX } = options;
 
-  let leftBorder = p.circle.pos.x;
+  let leftBorder = p.circle.pos.x - 10;
   let rightBorder = p.circle.pos.x + width;
-  let topBorder = p.circle.pos.y;
+  let topBorder = p.circle.pos.y - 10;
   let bottomBorder = p.circle.pos.y + height;
 
   return (mouseX > leftBorder) && (mouseX < rightBorder) && (mouseY > topBorder) && (mouseY < bottomBorder);
