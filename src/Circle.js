@@ -9,7 +9,7 @@ export class Circle {
     if (!this.active) return null;
     this.ctx.beginPath();
     this.ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI, false);
-    this.ctx.fillStyle = `rgba(255,255,255, ${this.active}`; //@tode rename "active" to "opacity" //new
+    this.ctx.fillStyle = `rgba(255,255,255, ${this.active}`; //@tode rename "active" to "opacity"
     this.ctx.fill();
   }
 }
